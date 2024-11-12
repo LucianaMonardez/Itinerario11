@@ -50,6 +50,7 @@
             guardarBtn = new Button();
             modificarBtn = new Button();
             eliminarBtn = new Button();
+            agregarBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)partidosDataGridView).BeginInit();
             SuspendLayout();
             // 
@@ -210,9 +211,9 @@
             // 
             // guardarBtn
             // 
-            guardarBtn.Location = new Point(162, 350);
+            guardarBtn.Location = new Point(151, 350);
             guardarBtn.Name = "guardarBtn";
-            guardarBtn.Size = new Size(75, 23);
+            guardarBtn.Size = new Size(86, 47);
             guardarBtn.TabIndex = 19;
             guardarBtn.Text = "Guardar";
             guardarBtn.UseVisualStyleBackColor = true;
@@ -238,11 +239,22 @@
             eliminarBtn.UseVisualStyleBackColor = true;
             eliminarBtn.Click += eliminarBtn_Click;
             // 
+            // agregarBtn
+            // 
+            agregarBtn.Location = new Point(37, 350);
+            agregarBtn.Name = "agregarBtn";
+            agregarBtn.Size = new Size(86, 47);
+            agregarBtn.TabIndex = 23;
+            agregarBtn.Text = "Agregar borrador";
+            agregarBtn.UseVisualStyleBackColor = true;
+            agregarBtn.Click += agregarBtn_Click;
+            // 
             // Partidos
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1165, 511);
+            Controls.Add(agregarBtn);
             Controls.Add(eliminarBtn);
             Controls.Add(modificarBtn);
             Controls.Add(guardarBtn);
@@ -296,5 +308,6 @@
         private Button guardarBtn;
         private Button modificarBtn;
         private Button eliminarBtn;
+        private Button agregarBtn;
     }
 }

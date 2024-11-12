@@ -19,7 +19,15 @@ namespace Business
 
         public List<Deporte> ObtenerDeportes()
         {
-            return _deporteDao.ObtenerDeportes();
+            try
+            {
+                return _deporteDao.Deportes;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
     }
 }

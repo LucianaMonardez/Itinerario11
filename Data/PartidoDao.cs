@@ -1,4 +1,5 @@
 ﻿using Entity;
+using Mapper;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,25 +12,28 @@ namespace Data
 {
     public class PartidoDao
     {
+        private DeporteDao _deporteDao = new DeporteDao();   
         public List<Partido> ObtenerPartidos() 
         {
             List<Partido> partidos = new List<Partido>();
-            SqlConnection sqlConnection = new SqlConnection(DBConfiguration.GetDbConfig());
+            SqlConnection sqlConnection = new SqlConnection(ConnectionUtils.GetDbConfig());
             try
             {
                 using (sqlConnection)
                 {
                     sqlConnection.Open();
                     string query = "SELECT * FROM Partido";
-                    SqlCommand command = new SqlCommand(query, sqlConnection);
 
-                    using (command)
+                    using (SqlCommand command = new SqlCommand(query, sqlConnection))
                     {
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                partidos.Add(MappearPartido(reader));
+                                Deporte deporte = _deporteDao.Deportes.FirstOrDefault(d => d.IdDeporte == Convert.ToInt32(reader["Id_Deporte"])) ??
+                                    throw new Exception($"No se encontro el deporte para el ID {reader["Id_Deporte"]}");
+
+                                partidos.Add(PartidoMapper.Map(reader, deporte));
                             }
                         }
                     }
@@ -46,7 +50,7 @@ namespace Data
 
         public void CrearPartido(Partido partido) 
         {
-            SqlConnection sqlConnection = new SqlConnection(DBConfiguration.GetDbConfig());
+            SqlConnection sqlConnection = new SqlConnection(ConnectionUtils.GetDbConfig());
             try
             {
                 using (sqlConnection)
@@ -80,15 +84,14 @@ namespace Data
 
         public void EliminarPartido(int partidoId) 
         {
-            SqlConnection sqlConnection = new SqlConnection(DBConfiguration.GetDbConfig());
             try
             {
-                using (sqlConnection)
+                using (SqlConnection sqlConnection = new SqlConnection(ConnectionUtils.GetDbConfig()))
                 {
                     sqlConnection.Open();
                     string query = "DELETE FROM Partido WHERE Id_Partido = @Id";
-                    SqlCommand command = new SqlCommand(query, sqlConnection);
-                    using (command)
+                    
+                    using (SqlCommand command = new SqlCommand(query, sqlConnection))
                     {
                         command.Parameters.AddWithValue("@Id", partidoId);
                         command.ExecuteNonQuery();
@@ -104,15 +107,14 @@ namespace Data
 
         public void ActualizarMarcadorPartido(Partido partido) 
         {
-            SqlConnection sqlConnection = new SqlConnection(DBConfiguration.GetDbConfig());
             try
             {
-                using (sqlConnection)
+                using (SqlConnection sqlConnection = new SqlConnection(ConnectionUtils.GetDbConfig()))
                 {
                     sqlConnection.Open();
                     string query = "UPDATE Partido SET Marcador_Local = @MarcadorLocal, Marcador_Visitante = @MarcadorVisitante WHERE Id_Partido = @Id";
-                    SqlCommand command = new SqlCommand(query, sqlConnection);
-                    using (command)
+                    
+                    using (SqlCommand command = new SqlCommand(query, sqlConnection))
                     {
                         command.Parameters.AddWithValue("@Id", partido.IdPartido);
                         command.Parameters.AddWithValue("@MarcadorLocal", partido.MarcadorLocal);
@@ -126,20 +128,6 @@ namespace Data
 
                 throw ex;
             }
-        }
-
-        private Partido MappearPartido(SqlDataReader reader)
-        {
-
-            return new Partido(
-                Convert.ToInt32(reader["Id_Partido"]),
-                Convert.ToInt32(reader["Id_Deporte"]),
-                Convert.ToString(reader["Equipo_Local"]),
-                Convert.ToString(reader["Equipo_Visitante"]),
-                Convert.ToDateTime(reader["Fecha_Registro"]),
-                Convert.ToDateTime(reader["Fecha_Partido"]),
-                Convert.ToInt32(reader["Marcador_Local"]),
-                Convert.ToInt32(reader["Marcador_Visitante"]));
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Entity
         public DateTime FechaPartido { get; set; }
         public int MarcadorLocal { get; set; }
         public int MarcadorVisitante { get; set; }
+        public Deporte Deporte { get; set; }
+        public string DescripcionDeporte { get => Deporte.Descripcion; }
 
         public Partido()
         {
@@ -48,6 +50,11 @@ namespace Entity
             FechaPartido = fechaPartido;
             MarcadorLocal = marcadorLocal;
             MarcadorVisitante = marcadorVisitante;
+        }
+
+        public Partido(int idPartido, int idDeporte, string equipoLocal, string equipoVisitante, DateTime fechaRegistro, DateTime fechaPartido, int marcadorLocal, int marcadorVisitante, Deporte deporte) : this(idPartido, idDeporte, equipoLocal, equipoVisitante, fechaRegistro, fechaPartido, marcadorLocal, marcadorVisitante)
+        {
+            this.Deporte = deporte;
         }
     }
 }

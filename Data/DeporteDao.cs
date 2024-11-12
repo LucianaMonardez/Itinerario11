@@ -1,4 +1,5 @@
 ﻿using Entity;
+using Mapper;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,10 +12,17 @@ namespace Data
 {
     public class DeporteDao
     {
-        public List<Deporte> ObtenerDeportes() 
+        public List<Deporte> Deportes = new List<Deporte>();
+
+        public DeporteDao()
+        {
+            Deportes = ObtenerDeportes();
+        }
+
+        private List<Deporte> ObtenerDeportes() 
         {
             List<Deporte> deportes = new List<Deporte>();
-            SqlConnection sqlConnection = new SqlConnection(DBConfiguration.GetDbConfig());
+            SqlConnection sqlConnection = new SqlConnection(ConnectionUtils.GetDbConfig());
 
             try
             {
@@ -30,7 +38,7 @@ namespace Data
                         {
                             while (reader.Read())
                             {
-                                deportes.Add(MappearDeporte(reader));
+                                deportes.Add(DeporteMapper.Map(reader));
                             }
                         }
                     }
@@ -42,13 +50,6 @@ namespace Data
             }
 
             return deportes;
-        }
-
-        private Deporte MappearDeporte(SqlDataReader reader)
-        {
-            return new Deporte(
-                Convert.ToInt32(reader["Id_Deporte"]),
-                Convert.ToString(reader["Descripcion"]));
         }
     }
 }

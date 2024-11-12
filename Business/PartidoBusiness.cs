@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Business
 {
@@ -20,22 +21,48 @@ namespace Business
 
         public List<Partido> ObtenerPartidos()
         {
-            _partidoList = _partidoDao.ObtenerPartidos();
-            return _partidoList;
+            try
+            {
+                _partidoList = _partidoDao.ObtenerPartidos();
+                return _partidoList;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
-        public void CrearPartido(Partido partido)
+        public void CrearPartidos(List<Partido> partidos) 
+        {
+            using (TransactionScope transaction = new TransactionScope())
+            {
+                foreach (var partido in partidos)
+                {
+                    CrearPartido(partido);
+                }
+                transaction.Complete();
+            }
+        }
+
+        private void CrearPartido(Partido partido)
         {
             try
             {
-                ValidarCamposEquipo(partido.EquipoLocal, "local");
-                ValidarCamposEquipo(partido.EquipoVisitante, "visitante");
-                if (partido.EquipoVisitante.Length < 5)
-                    throw new Exception("El equipo visitante debe tener mas de 5 caracteres");
-                if (partido.FechaPartido.Date < DateTime.Now.Date)
-                    throw new Exception("La fecha del partido no puede ser menor a la fecha actual");
+                using (TransactionScope transaction = new TransactionScope()) 
+                {
 
-                _partidoDao.CrearPartido(partido);
+                    ValidarCamposEquipo(partido.EquipoLocal, "local");
+                    ValidarCamposEquipo(partido.EquipoVisitante, "visitante");
+                    if (partido.EquipoVisitante.Length < 5)
+                        throw new Exception("El equipo visitante debe tener mas de 5 caracteres");
+                    if (partido.FechaPartido.Date < DateTime.Now.Date)
+                        throw new Exception("La fecha del partido no puede ser menor a la fecha actual");
+
+                    _partidoDao.CrearPartido(partido);
+
+                    transaction.Complete();
+                }
             }
             catch (Exception ex)
             {
@@ -59,9 +86,16 @@ namespace Business
         {
             try
             {
-                Partido partido = ValidarId(id);
 
-                _partidoDao.EliminarPartido(partido.IdPartido);
+                using (TransactionScope transaction = new TransactionScope())
+                {
+                    Partido partido = ValidarId(id);
+
+                    _partidoDao.EliminarPartido(partido.IdPartido);
+
+                    transaction.Complete();
+                }
+                    
             }
             catch (Exception ex)
             {
@@ -74,17 +108,22 @@ namespace Business
         {
             try
             {
-                ValidarMarcadores(marcadorLocal, marcadorVisitante);
-                Partido partido = ValidarId(id);
+                using (TransactionScope transaction = new TransactionScope())
+                {
+                    ValidarMarcadores(marcadorLocal, marcadorVisitante);
+                    Partido partido = ValidarId(id);
 
-                //validamos que solo se puedan modificar los partidos de la fecha de hoy
-                if (partido.FechaPartido.Date != DateTime.Now.Date)
-                    throw new Exception("Solo se pueden modificar los partidos que se jueguen en esta fecha, por favor seleccione otro partido");
+                    //validamos que solo se puedan modificar los partidos de la fecha de hoy
+                    if (partido.FechaPartido.Date != DateTime.Now.Date)
+                        throw new Exception("Solo se pueden modificar los partidos que se jueguen en esta fecha, por favor seleccione otro partido");
 
-                _partidoDao.ActualizarMarcadorPartido(
-                    new Partido(partido.IdPartido, 
-                    Convert.ToInt32(marcadorLocal), 
-                    Convert.ToInt32(marcadorVisitante)));
+                    _partidoDao.ActualizarMarcadorPartido(
+                        new Partido(partido.IdPartido,
+                        Convert.ToInt32(marcadorLocal),
+                        Convert.ToInt32(marcadorVisitante)));
+
+                    transaction.Complete();
+                }
             }
             catch (Exception ex)
             {
